@@ -1,150 +1,327 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Reप</title>
-<style>
-  .container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    height: 100vh;
-    margin: 0;
-    padding: 20px;
-    gap: 40px; /* Left box and right controls के बीच space */
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔴 Redmi Matrix Pro - Persistent Storage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-  .real-size-box {
-    width: 81.2mm;
-    height: 178mm;
-    border: 1px solid red;
-    box-sizing: border-box;
-    background-color: #f8f8f8;
-    overflow: hidden; /* Overflow को रोकने के लिए */
-    position: relative;
-  }
+        body {
+            background: #03050a;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: auto;
+        }
 
-  .iphone-box {
-    width: 71.6mm;
-    height: 147.6mm;
-    border: 1px solid blue;
-    box-sizing: border-box;
-    background-color: #f8f8f8;
-    overflow: hidden; /* Overflow को रोकने के लिए */
-    position: relative;
-  }
+        .dashboard {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
 
-  .controls {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+        .redmi-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+        }
 
-  input[type="text"] {
-    width: 300px;
-    padding: 10px;
-    margin-bottom: 10px;
-    font-size: 16px;
-  }
+        .redmi-col {
+            flex: 0 0 auto;
+            position: relative;
+        }
 
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
+        .redmi-frame {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #ff3b3b;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
 
-  iframe {
-    border: none;
-    transform-origin: top left;
-  }
-</style>
+        .scale-wrapper {
+            width: 375px;
+            transform-origin: top left;
+        }
+
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        .control-panel {
+            width: 300px;
+            background: rgba(15, 15, 25, 0.98);
+            border-radius: 20px;
+            padding: 15px;
+            border: 1px solid #ff3b3b;
+            position: sticky;
+            top: 10px;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            color: #ff3b3b;
+            text-align: center;
+            font-weight: 800;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .url-row {
+            background: #111;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #222;
+            margin-bottom: 12px;
+        }
+
+        .url-row label {
+            color: #00ffcc;
+            font-size: 11px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 8px;
+            background: #1e1e2a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .dim-inputs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .dim-inputs input {
+            width: 50%;
+            padding: 6px;
+            background: #000;
+            border: 1px solid #ff3b3b;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            border-radius: 6px;
+            border: none;
+            font-size: 11px;
+        }
+
+        .load-btn { flex: 2; background: #ff3b3b; color: white; padding: 7px; }
+        .del-btn { flex: 1; background: #222; color: #ff6666; padding: 7px; }
+        .del-btn:hover { background: #ff0000; color: white; }
+
+        .add-btn {
+            width: 100%;
+            padding: 12px;
+            background: #00ffcc;
+            color: #000;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .global-btns {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: 1px solid #555;
+            color: white;
+        }
+        .action-btn:hover { border-color: #ff3b3b; color: #ff3b3b; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="real-size-box">
-      <iframe id="previewFrame" src="about:blank"></iframe>
-    </div>
-    <div class="controls">
-      <h2>URL Search Box</h2>
-      <input type="text" id="urlInput" placeholder="Enter website URL here (e.g., https://example.com or http://example.com)" />
-      <button onclick="loadURL()">Load in Frame</button>
-      <button onclick="openNewWindow()">Open in New Window</button>
-    </div>
-    <div class="iphone-box">
-      <iframe id="iphoneFrame" src="about:blank"></iframe>
-    </div>
-  </div>
 
-  <script>
-    function loadURL() {
-      let url = document.getElementById('urlInput').value.trim();
-      if (url) {
-        // अगर URL में http:// या https:// नहीं है, तो https:// जोड़ दो (default secure)
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
+<div class="dashboard">
+    <div class="redmi-grid" id="redmiGrid"></div>
+    
+    <div class="control-panel">
+        <div class="panel-header">⚡ MATRIX MANAGER</div>
+        
+        <div id="urlList"></div>
+        
+        <button class="add-btn" onclick="addRedmiDevice()">➕ ADD NEW DEVICE</button>
+        
+        <div class="global-btns">
+            <button class="action-btn" onclick="loadAll()">⚡ LOAD ALL</button>
+            <button class="action-btn" style="color: #ff6666;" onclick="clearStorage()">🧹 CLEAR ALL DATA</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // LocalStorage से डेटा लोड करना या डिफॉल्ट डेटा लेना
+    let devices = JSON.parse(localStorage.getItem('redmi_matrix_data')) || [
+        { id: Date.now(), url: '', width: 280, height: 600 }
+    ];
+
+    // डेटा को LocalStorage में सेव करने का फंक्शन
+    function saveData() {
+        localStorage.setItem('redmi_matrix_data', JSON.stringify(devices));
+    }
+
+    function renderEverything() {
+        renderGrid();
+        renderPanel();
+        setTimeout(applyScaling, 100);
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('redmiGrid');
+        grid.innerHTML = '';
+        
+        devices.forEach(dev => {
+            const col = document.createElement('div');
+            col.className = 'redmi-col';
+            col.style.width = dev.width + 'px';
+            col.id = `col-${dev.id}`;
+            
+            col.innerHTML = `
+                <div class="redmi-frame" id="frame-${dev.id}" style="height: ${dev.height}px;">
+                    <div class="scale-wrapper" id="scale-${dev.id}">
+                        <iframe id="iframe-${dev.id}" src="${dev.url || 'about:blank'}"></iframe>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(col);
+        });
+    }
+
+    function renderPanel() {
+        const list = document.getElementById('urlList');
+        list.innerHTML = '';
+        
+        devices.forEach((dev, index) => {
+            const row = document.createElement('div');
+            row.className = 'url-row';
+            row.innerHTML = `
+                <label>📱 DEVICE #${index + 1}</label>
+                <input type="text" class="url-input" id="in-url-${dev.id}" placeholder="Enter URL..." value="${dev.url}" oninput="updateUrlData(${dev.id}, this.value)">
+                
+                <div class="dim-inputs">
+                    <input type="number" id="in-w-${dev.id}" placeholder="Width" value="${dev.width}" oninput="updateSizeData(${dev.id})">
+                    <input type="number" id="in-h-${dev.id}" placeholder="Height" value="${dev.height}" oninput="updateSizeData(${dev.id})">
+                </div>
+
+                <div class="btn-group">
+                    <button class="load-btn" onclick="loadSingle(${dev.id})">LOAD</button>
+                    <button class="del-btn" onclick="deleteDevice(${dev.id})">DELETE</button>
+                </div>
+            `;
+            list.appendChild(row);
+        });
+    }
+
+    function addRedmiDevice() {
+        devices.push({ id: Date.now(), url: '', width: 280, height: 600 });
+        saveData();
+        renderEverything();
+    }
+
+    function deleteDevice(id) {
+        devices = devices.filter(d => d.id !== id);
+        saveData();
+        renderEverything();
+    }
+
+    function updateUrlData(id, val) {
+        const dev = devices.find(d => d.id === id);
+        if(dev) {
+            dev.url = val;
+            saveData();
         }
-        document.getElementById('previewFrame').src = url;
-        document.getElementById('iphoneFrame').src = url;
-        adjustRedmiScale(); // Adjust after loading
-        adjustIphoneScale();
-      } else {
-        alert('Please enter a valid URL');
-      }
     }
 
-    function openNewWindow() {
-      let url = document.getElementById('urlInput').value.trim();
-      if (url) {
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
+    function updateSizeData(id) {
+        const w = document.getElementById(`in-w-${id}`).value;
+        const h = document.getElementById(`in-h-${id}`).value;
+        const dev = devices.find(d => d.id === id);
+        if(dev) {
+            dev.width = w;
+            dev.height = h;
+            saveData();
+            
+            // UI तुरंत अपडेट करें
+            const col = document.getElementById(`col-${id}`);
+            const frame = document.getElementById(`frame-${id}`);
+            if(col) col.style.width = w + 'px';
+            if(frame) frame.style.height = h + 'px';
+            applyScaling();
         }
-        window.open(url, '_blank');
-      } else {
-        alert('Please enter a valid URL');
-      }
     }
 
-    function adjustRedmiScale() {
-      const mobileWidth = 375; // Typical mobile logical width (e.g., iPhone)
-      const mobileHeight = 812; // Typical mobile logical height
-      const box = document.querySelector('.real-size-box');
-      const boxWidth = box.clientWidth;
-      const boxHeight = box.clientHeight;
-      const scaleX = boxWidth / mobileWidth;
-      const scaleY = boxHeight / mobileHeight;
-      const scale = Math.min(scaleX, scaleY);
-      const iframe = document.getElementById('previewFrame');
-      iframe.style.width = `${mobileWidth}px`;
-      iframe.style.height = `${mobileHeight}px`;
-      iframe.style.transform = `scale(${scale})`;
+    function loadSingle(id) {
+        const input = document.getElementById(`in-url-${id}`);
+        const iframe = document.getElementById(`iframe-${id}`);
+        let url = input.value.trim();
+        if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+        
+        updateUrlData(id, url);
+        iframe.src = url || 'about:blank';
     }
 
-    function adjustIphoneScale() {
-      const mobileWidth = 393; // iPhone 16 logical width
-      const mobileHeight = 852; // iPhone 16 logical height
-      const box = document.querySelector('.iphone-box');
-      const boxWidth = box.clientWidth;
-      const boxHeight = box.clientHeight;
-      const scaleX = boxWidth / mobileWidth;
-      const scaleY = boxHeight / mobileHeight;
-      const scale = Math.min(scaleX, scaleY);
-      const iframe = document.getElementById('iphoneFrame');
-      iframe.style.width = `${mobileWidth}px`;
-      iframe.style.height = `${mobileHeight}px`;
-      iframe.style.transform = `scale(${scale})`;
+    function applyScaling() {
+        devices.forEach(dev => {
+            const frame = document.getElementById(`frame-${dev.id}`);
+            const wrapper = document.getElementById(`scale-${dev.id}`);
+            if (frame && wrapper) {
+                const scale = frame.clientWidth / 375;
+                wrapper.style.transform = `scale(${scale})`;
+                wrapper.style.height = (frame.clientHeight / scale) + 'px';
+            }
+        });
     }
 
-    // Initial adjust
-    adjustRedmiScale();
-    adjustIphoneScale();
+    function loadAll() {
+        devices.forEach(d => loadSingle(d.id));
+    }
 
-    // Adjust on resize (e.g., zoom changes)
-    window.addEventListener('resize', () => {
-      adjustRedmiScale();
-      adjustIphoneScale();
-    });
-  </script>
+    function clearStorage() {
+        if(confirm("Are you sure? All saved settings and URLs will be deleted!")) {
+            localStorage.removeItem('redmi_matrix_data');
+            location.reload();
+        }
+    }
+
+    window.onload = renderEverything;
+    window.onresize = applyScaling;
+    setInterval(applyScaling, 2000);
+</script>
+
 </body>
 </html>
